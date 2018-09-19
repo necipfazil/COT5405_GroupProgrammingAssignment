@@ -14,8 +14,7 @@ using namespace std;
 const unsigned int digitPerUINT = 8;
 const unsigned int maxValueForCell = 10e8-1;
 const unsigned int minValueForCell = 10e7;
-const unsigned int repetition = 1000;    
-
+const unsigned int repetition = 1000;
 
 void printBigNumber(unsigned int number[], unsigned int size)
 {
@@ -146,22 +145,21 @@ unsigned long evaluation(unsigned int n)
 	auto current_time = std::chrono::high_resolution_clock::now();
     
     // Compute the execution time.
-    unsigned long usec = std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
+    unsigned long usec = std::chrono::duration_cast<std::chrono::nanoseconds>(current_time - start_time).count();
     
     return usec;
     
 }
 
+
 int main(int argc , char *argv[])
 {      
 
-    unsigned long usec = 0;
-    for (int n = 4; n <= 512 ; n*=2 )
+    unsigned long nanoSeconds = 0;
+    for (int n = 4; n <= 512 ; n*=2)
     {
-        cout << "n is " << n << endl;
-        // TODO: cache must be flushed each time.
-        usec = evaluation(n);
-        cout << "Execution time: " << usec << " us" << endl;
+        nanoSeconds = evaluation(n);
+        cout << "Execution time (n=" << n << "): " << nanoSeconds << " nanoseconds" << endl;
     }
     
     return 0;
