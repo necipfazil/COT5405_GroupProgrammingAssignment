@@ -6,13 +6,29 @@
 
 #include <iostream>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
-int main()
+// Globals for evaluation.
+const unsigned int digitPerUINT = 8;
+const unsigned int maxValueForCell = 10e8-1;
+const unsigned int minValueForCell = 10e7;
+const unsigned int repetition = 1000;    
+
+
+void printBigNumber(unsigned int number[], unsigned int size)
+{
+    for(int n = size-1; n >= 0; n--)
+    {
+        cout << number[n];
+    }
+    cout << endl;
+}
+
+void subtraction(unsigned int k, unsigned int min, unsigned int max)
 {
     // Define arrays.
-    unsigned int k = 3;
     unsigned int firstValue[k];
     unsigned int secondValue[k];
     unsigned int finalValue[k];
@@ -24,32 +40,24 @@ int main()
     bool isNegative = false;
 
     // Populate arrays with random numbers.
-    const unsigned int min = 1e8;
-    const unsigned int range = 999999999 - 1e8;
+    unsigned int range = max - min + 1;
     for(int i = 0; i < k; i++)
     {
-        // Since unsigned integer can hold up to 10 digit, restrict it to 9 digit to be safe.
         firstValue[i] = min + (rand() % range);
         secondValue[i] = min + (rand() % range);
     }
 
     // Print values.
+    
+    /*
     cout << "Value One:\t";
-    for(int n = k-1; n >= 0; n--)
-    {
-        cout << firstValue[n];
-    }
-    cout << endl;
+    printBigNumber(firstValue, k);
     
     cout << "Value Two:\t";
-    for(int m = k-1; m >= 0; m--)
-    {
-        cout << secondValue[m];
-    }
-    cout << "\n";
-
-    // Determine whether the result will be positive or negative.
+    printBigNumber(secondValue, k);
+    */
     
+    // Determine whether the result will be positive or negative.
     int index = k-1;
     
     while (index >= 0)
@@ -79,9 +87,9 @@ int main()
             if(firstValue[indexTwo] < secondValue[indexTwo])
             {
                 // Decrement the next one by one,
-                firstValue[indexTwo + 1] = firstValue[indexTwo + 1] -1;
+                firstValue[indexTwo + 1] -= 1;
                 // ... Add the current one the corresponding value.
-                firstValue[indexTwo] = firstValue[indexTwo] + 1e8;
+                firstValue[indexTwo] += 10*min;
             }
             // Put the result in corresponding position in the final array.
             finalValue[indexTwo] = firstValue[indexTwo] - secondValue[indexTwo];
@@ -96,26 +104,69 @@ int main()
         
             if(firstValue[indexThree] > secondValue[indexThree])
             {
-                secondValue[indexThree + 1] = secondValue[indexThree + 1] -1;
-                secondValue[indexThree] = secondValue[indexThree] + 1e8;
+                secondValue[indexThree + 1] -= 1;
+                secondValue[indexThree] += 10*min;
             }
             finalValue[indexThree] = secondValue[indexThree] - firstValue[indexThree];
        }
     }
 
 
-    //print final answer
-    cout << "Final Answer:\t";
+    //Print final answer
+    
+    /*cout << "Final Answer:\t";
     if (isNegative)
         cout << "-";
     else
         cout << " ";
         
-    for(int indexFour = k-1; indexFour >= 0; indexFour--)
-        cout << finalValue[indexFour];
+    printBigNumber(finalValue,k);*/
     
-    cout << "\n";
+}
 
+
+// Measures the time for the execution.
+unsigned long evaluation(unsigned int n)
+{
+    // Start the timer.
+    auto start_time = std::chrono::high_resolution_clock::now(); 
+    
+    if(n == 4)
+    {
+        for(int i = 0; i < repetition; i++)
+            subtraction(1,1e3,9999);
+    }
+    else
+    {
+        for(int i = 0; i < repetition; i++)
+            subtraction(n/digitPerUINT,minValueForCell,maxValueForCell);
+    }
+    
+    // Stop the timer.
+	auto current_time = std::chrono::high_resolution_clock::now();
+    
+    // Compute the execution time.
+    unsigned long usec = std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
+    
+    return usec;
+    
+}
+
+int main(int argc , char *argv[])
+{      
+
+    unsigned long usec = 0;
+    for (int n = 4; n <= 512 ; n*=2 )
+    {
+        cout << "n is " << n << endl;
+        // TODO: cache must be flushed each time.
+        usec = evaluation(n);
+        cout << "Execution time: " << usec << " us" << endl;
+    }
+    
     return 0;
 }
+
+
+
 
